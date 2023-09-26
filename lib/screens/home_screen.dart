@@ -1,14 +1,10 @@
-import 'package:chat3/pages/calls_page.dart';
-import 'package:chat3/pages/contacts_page.dart';
-import 'package:chat3/pages/messages_page.dart';
-import 'package:chat3/pages/notifications_page.dart';
+import 'package:chat3/pages/pages.dart';
+import 'package:chat3/screens/screens.dart';
 import 'package:chat3/theme.dart';
-import 'package:chat3/widgets/glowing_action_button.dart';
 import 'package:chat3/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import '../helpers.dart';
+import 'package:chat3/app.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({Key? key}) : super(key: key);
@@ -49,7 +45,7 @@ class HomeScreen extends StatelessWidget {
               value,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 17,
               ),
             );
           },
@@ -67,7 +63,15 @@ class HomeScreen extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 24.0),
-            child: Avatar.small(url: Helpers.randomPictureUrl()),
+            child: Hero(
+              tag: 'hero-profile-picture',
+              child: Avatar.small(
+                url: context.currentUserImage,
+                onTap: () {
+                  Navigator.of(context).push(ProfileScreen.route);
+                },
+              ),
+            ),
           ),
         ],
       ),
@@ -141,7 +145,15 @@ class __BottomNavigationBarState extends State<_BottomNavigationBar> {
                   color: AppColors.secondary,
                   icon: CupertinoIcons.add,
                   onPressed: () {
-                    print('TODO on new message');
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) => const Dialog(
+                        child: AspectRatio(
+                          aspectRatio: 8 / 7,
+                          child: ContactsPage(),
+                        ),
+                      ),
+                    );
                   },
                 ),
               ),
@@ -197,7 +209,7 @@ class _NavigationBarItem extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: 20,
+              size: 22,
               color: isSelected ? AppColors.secondary : null,
             ),
             const SizedBox(
@@ -207,10 +219,10 @@ class _NavigationBarItem extends StatelessWidget {
               lable,
               style: isSelected
                   ? const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.secondary,
-                    )
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: AppColors.secondary,
+              )
                   : const TextStyle(fontSize: 11),
             ),
           ],
