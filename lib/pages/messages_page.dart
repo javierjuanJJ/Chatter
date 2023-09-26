@@ -5,6 +5,7 @@ import 'package:chat3/widgets/widgets.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
+
 import '../helpers.dart';
 
 class MessagesPage extends StatelessWidget {
@@ -32,7 +33,7 @@ class MessagesPage extends StatelessWidget {
         senderName: faker.person.name(),
         message: faker.lorem.sentence(),
         messageDate: date,
-        dateMessage: Jiffy(date).fromNow(),
+        dateMessage: Jiffy.parseFromDateTime(date).fromNow().toString(),
         profilePicture: Helpers.randomPictureUrl(),
       ),
     );

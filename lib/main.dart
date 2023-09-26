@@ -1,5 +1,5 @@
-import 'package:chat3/theme.dart';
 import 'package:chat3/screens/screens.dart';
+import 'package:chat3/theme.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());

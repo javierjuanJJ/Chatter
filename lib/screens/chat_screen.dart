@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 
 class ChatScreen extends StatelessWidget {
   static Route route(MessageData data) => MaterialPageRoute(
-    builder: (context) => ChatScreen(
-      messageData: data,
-    ),
-  );
+        builder: (context) => ChatScreen(
+          messageData: data,
+        ),
+      );
 
   const ChatScreen({
     Key? key,
@@ -146,7 +146,7 @@ class _MessageTile extends StatelessWidget {
               ),
               child: Padding(
                 padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20),
+                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20),
                 child: Text(message),
               ),
             ),
@@ -201,7 +201,7 @@ class _MessageOwnTile extends StatelessWidget {
               ),
               child: Padding(
                 padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20),
+                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20),
                 child: Text(message,
                     style: const TextStyle(
                       color: AppColors.textLigth,

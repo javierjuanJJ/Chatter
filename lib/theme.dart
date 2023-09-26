@@ -31,33 +31,33 @@ abstract class AppTheme {
 
   /// Light theme and its settings.
   static ThemeData light() => ThemeData(
-    brightness: Brightness.light,
-    hintColor: accentColor,
-    visualDensity: visualDensity,
-    textTheme:
-    GoogleFonts.mulishTextTheme().apply(bodyColor: AppColors.textDark),
-    backgroundColor: _LightColors.background,
-    scaffoldBackgroundColor: _LightColors.background,
-    cardColor: _LightColors.card,
-    primaryTextTheme: const TextTheme(
-      headline6: TextStyle(color: AppColors.textDark),
-    ),
-    iconTheme: const IconThemeData(color: AppColors.iconDark),
-  );
+        brightness: Brightness.light,
+        hintColor: accentColor,
+        visualDensity: visualDensity,
+        textTheme:
+            GoogleFonts.mulishTextTheme().apply(bodyColor: AppColors.textDark),
+        backgroundColor: _LightColors.background,
+        scaffoldBackgroundColor: _LightColors.background,
+        cardColor: _LightColors.card,
+        primaryTextTheme: const TextTheme(
+          headline6: TextStyle(color: AppColors.textDark),
+        ),
+        iconTheme: const IconThemeData(color: AppColors.iconDark),
+      );
 
   /// Dark theme and its settings.
   static ThemeData dark() => ThemeData(
-    brightness: Brightness.dark,
-    hintColor: accentColor,
-    visualDensity: visualDensity,
-    textTheme:
-    GoogleFonts.interTextTheme().apply(bodyColor: AppColors.textLigth),
-    backgroundColor: _DarkColors.background,
-    scaffoldBackgroundColor: _DarkColors.background,
-    cardColor: _DarkColors.card,
-    primaryTextTheme: const TextTheme(
-      headline6: TextStyle(color: AppColors.textLigth),
-    ),
-    iconTheme: const IconThemeData(color: AppColors.iconLight),
-  );
+        brightness: Brightness.dark,
+        hintColor: accentColor,
+        visualDensity: visualDensity,
+        textTheme:
+            GoogleFonts.interTextTheme().apply(bodyColor: AppColors.textLigth),
+        backgroundColor: _DarkColors.background,
+        scaffoldBackgroundColor: _DarkColors.background,
+        cardColor: _DarkColors.card,
+        primaryTextTheme: const TextTheme(
+          headline6: TextStyle(color: AppColors.textLigth),
+        ),
+        iconTheme: const IconThemeData(color: AppColors.iconLight),
+      );
 }
