@@ -12,8 +12,6 @@ import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:chat3/app.dart';
 
-import '../widgets/icon_buttons.dart';
-
 class ChatScreen extends StatefulWidget {
   static Route routeWithChannel(Channel channel) => MaterialPageRoute(
     builder: (context) => StreamChannel(
@@ -62,10 +60,6 @@ class _ChatScreenState extends State<ChatScreen> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         appBar: AppBar(
-          iconTheme: Theme.of(context).iconTheme,
-          centerTitle: false,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
           leadingWidth: 54,
           leading: Align(
             alignment: Alignment.centerRight,
@@ -147,7 +141,7 @@ class _MessageList extends StatelessWidget {
             final message = messages[index];
             final nextMessage = messages[index + 1];
             if (!Jiffy.parseFromDateTime(message.createdAt.toLocal())
-                .isSame(Jiffy.parseFromDateTime(nextMessage.createdAt.toLocal()),unit: Unit.day)) {
+                .isSame(Jiffy.parseFromDateTime(nextMessage.createdAt.toLocal()), unit: Unit.day)) {
               return _DateLable(
                 dateTime: message.createdAt,
               );
@@ -304,17 +298,19 @@ class __DateLableState extends State<_DateLable> {
     final createdAt = Jiffy.parseFromDateTime(widget.dateTime);
     final now = DateTime.now();
 
-    if (Jiffy.parseFromJiffy(createdAt).isSame(Jiffy.parseFromDateTime(now), unit: Unit.day)) {
+    if (Jiffy.parseFromJiffy(createdAt).isSame(Jiffy.now(), unit: Unit.day)) {
       dayInfo = 'TODAY';
     } else if (Jiffy.parseFromJiffy(createdAt)
-        .isSame(Jiffy.parseFromDateTime(now.subtract(const Duration(days: 1))), unit: Unit.day)) {
+        .isSame(Jiffy.now().subtract(days: 1), unit: Unit.day)) {
       dayInfo = 'YESTERDAY';
     } else if (Jiffy.parseFromJiffy(createdAt).isAfter(
-      Jiffy.parseFromDateTime(now.subtract(const Duration(days: 7))), unit: Unit.day,
+      Jiffy.now().subtract(days: 7),
+      unit: Unit.day,
     )) {
       dayInfo = createdAt.EEEE;
     } else if (Jiffy.parseFromJiffy(createdAt).isAfter(
-      Jiffy.parseFromDateTime(now).subtract(years: 1), unit: Unit.day
+      Jiffy.parseFromDateTime(now).subtract(years: 1),
+      unit: Unit.day,
     )) {
       dayInfo = createdAt.MMMd;
     } else {
@@ -450,13 +446,10 @@ class _AppBarTitle extends StatelessWidget {
             ),
           );
         } else {
-          var lastActive2;
-          if (otherMember.user != null && otherMember.user?.lastActive != null){
-            lastActive2 = otherMember.user?.lastActive;
-          }
+
           alternativeWidget = Text(
             'Last online: '
-                '${(Jiffy.parseFromDateTime(lastActive2)).fromNow()}',
+                '${Jiffy.parseFromDateTime(otherMember.user!.lastActive!).fromNow()}',
             style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,
