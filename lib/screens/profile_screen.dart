@@ -60,7 +60,7 @@ class __SignOutButtonState extends State<_SignOutButton> {
 
       Navigator.of(context).push(SelectUserScreen.route);
     } on Exception catch (e, st) {
-      logger.e('Could not sign out', e, st);
+      logger.e('Could not sign out', error: e, stackTrace: st);
       setState(() {
         _loading = false;
       });

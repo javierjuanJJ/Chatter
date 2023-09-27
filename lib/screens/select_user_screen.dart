@@ -42,7 +42,7 @@ class _SelectUserScreenState extends State<SelectUserScreen> {
         MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } on Exception catch (e, st) {
-      logger.e('Could not connect user', e, st);
+      logger.e('Could not connect user', error: e, stackTrace: st);
       setState(() {
         _loading = false;
       });
