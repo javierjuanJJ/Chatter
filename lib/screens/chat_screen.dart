@@ -1,10 +1,8 @@
 import 'dart:async';
 
 import 'package:chat3/helpers.dart';
-import 'package:chat3/widgets/display_error_message.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:chat3/theme.dart';
-import 'package:chat3/widgets/glowing_action_button.dart';
 import 'package:chat3/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +23,7 @@ class ChatScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  State<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
@@ -140,8 +138,8 @@ class _MessageList extends StatelessWidget {
           } else if (index <= messages.length) {
             final message = messages[index];
             final nextMessage = messages[index + 1];
-            if (!Jiffy.parseFromDateTime(message.createdAt.toLocal())
-                .isSame(Jiffy.parseFromDateTime(nextMessage.createdAt.toLocal()), unit: Unit.day)) {
+            if (!Jiffy(message.createdAt.toLocal())
+                .isSame(nextMessage.createdAt.toLocal(), Units.DAY)) {
               return _DateLable(
                 dateTime: message.createdAt,
               );
@@ -207,7 +205,7 @@ class _MessageTile extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
-                Jiffy.parseFromDateTime(message.createdAt.toLocal()).jm,
+                Jiffy(message.createdAt.toLocal()).jm,
                 style: const TextStyle(
                   color: AppColors.textFaded,
                   fontSize: 10,
@@ -263,7 +261,7 @@ class _MessageOwnTile extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
-                Jiffy.parseFromDateTime(message.createdAt.toLocal()).jm,
+                Jiffy(message.createdAt.toLocal()).jm,
                 style: const TextStyle(
                   color: AppColors.textFaded,
                   fontSize: 10,
@@ -295,22 +293,22 @@ class __DateLableState extends State<_DateLable> {
 
   @override
   void initState() {
-    final createdAt = Jiffy.parseFromDateTime(widget.dateTime);
+    final createdAt = Jiffy(widget.dateTime);
     final now = DateTime.now();
 
-    if (Jiffy.parseFromJiffy(createdAt).isSame(Jiffy.now(), unit: Unit.day)) {
+    if (Jiffy(createdAt).isSame(now, Units.DAY)) {
       dayInfo = 'TODAY';
-    } else if (Jiffy.parseFromJiffy(createdAt)
-        .isSame(Jiffy.now().subtract(days: 1), unit: Unit.day)) {
+    } else if (Jiffy(createdAt)
+        .isSame(now.subtract(const Duration(days: 1)), Units.DAY)) {
       dayInfo = 'YESTERDAY';
-    } else if (Jiffy.parseFromJiffy(createdAt).isAfter(
-      Jiffy.now().subtract(days: 7),
-      unit: Unit.day,
+    } else if (Jiffy(createdAt).isAfter(
+      now.subtract(const Duration(days: 7)),
+      Units.DAY,
     )) {
       dayInfo = createdAt.EEEE;
-    } else if (Jiffy.parseFromJiffy(createdAt).isAfter(
-      Jiffy.parseFromDateTime(now).subtract(years: 1),
-      unit: Unit.day,
+    } else if (Jiffy(createdAt).isAfter(
+      Jiffy(now).subtract(years: 1),
+      Units.DAY,
     )) {
       dayInfo = createdAt.MMMd;
     } else {
@@ -446,10 +444,9 @@ class _AppBarTitle extends StatelessWidget {
             ),
           );
         } else {
-
           alternativeWidget = Text(
             'Last online: '
-                '${Jiffy.parseFromDateTime(otherMember.user!.lastActive!).fromNow()}',
+                '${Jiffy(otherMember.user?.lastActive).fromNow()}',
             style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,
@@ -573,21 +570,39 @@ class _ActionBar extends StatefulWidget {
 }
 
 class __ActionBarState extends State<_ActionBar> {
-  final TextEditingController controller = TextEditingController();
+  final StreamMessageInputController controller =
+  StreamMessageInputController();
+
+  Timer? _debounce;
 
   Future<void> _sendMessage() async {
     if (controller.text.isNotEmpty) {
-      StreamChannel.of(context)
-          .channel
-          .sendMessage(Message(text: controller.text));
+      StreamChannel.of(context).channel.sendMessage(controller.message);
       controller.clear();
       FocusScope.of(context).unfocus();
     }
   }
 
+  void _onTextChange() {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(seconds: 1), () {
+      if (mounted) {
+        StreamChannel.of(context).channel.keyStroke();
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    controller.addListener(_onTextChange);
+  }
+
   @override
   void dispose() {
+    controller.removeListener(_onTextChange);
     controller.dispose();
+
     super.dispose();
   }
 
@@ -618,9 +633,9 @@ class __ActionBarState extends State<_ActionBar> {
             child: Padding(
               padding: const EdgeInsets.only(left: 16.0),
               child: TextField(
-                controller: controller,
+                controller: controller.textEditingController,
                 onChanged: (val) {
-                  StreamChannel.of(context).channel.keyStroke();
+                  controller.text = val;
                 },
                 style: const TextStyle(fontSize: 14),
                 decoration: const InputDecoration(

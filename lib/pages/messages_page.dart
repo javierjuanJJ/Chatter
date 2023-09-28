@@ -1,7 +1,6 @@
 import 'package:chat3/models/models.dart';
 import 'package:chat3/screens/screens.dart';
 import 'package:chat3/theme.dart';
-import 'package:chat3/widgets/display_error_message.dart';
 import 'package:chat3/widgets/widgets.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
@@ -10,66 +9,89 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:chat3/app.dart';
 
 import '../helpers.dart';
-import '../widgets/unread_indicator.dart';
 
 class MessagesPage extends StatefulWidget {
   const MessagesPage({Key? key}) : super(key: key);
 
   @override
-  _MessagesPageState createState() => _MessagesPageState();
+  State<MessagesPage> createState() => _MessagesPageState();
 }
 
 class _MessagesPageState extends State<MessagesPage> {
-  final channelListController = ChannelListController();
+  late final channelListController = StreamChannelListController(
+    client: StreamChatCore.of(context).client,
+    filter: Filter.and(
+      [
+        Filter.equal('type', 'messaging'),
+        Filter.in_('members', [
+          StreamChatCore.of(context).currentUser!.id,
+        ])
+      ],
+    ),
+  );
+
+  @override
+  void initState() {
+    channelListController.doInitialLoad();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    channelListController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ChannelListCore(
-      channelListController: channelListController,
-      filter: Filter.and(
-        [
-          Filter.equal('type', 'messaging'),
-          Filter.in_('members', [
-            StreamChatCore.of(context).currentUser!.id,
-          ])
-        ],
-      ),
-      emptyBuilder: (context) => const Center(
-        child: Text(
-          'So empty.\nGo and message someone.',
-          textAlign: TextAlign.center,
-        ),
-      ),
-      errorBuilder: (context, error) => DisplayErrorMessage(
-        error: error,
-      ),
-      loadingBuilder: (
-          context,
-          ) =>
-      const Center(
-        child: SizedBox(
-          height: 100,
-          width: 100,
-          child: CircularProgressIndicator(),
-        ),
-      ),
-      listBuilder: (context, channels) {
-        return CustomScrollView(
-          slivers: [
-            const SliverToBoxAdapter(
-              child: _Stories(),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                  return _MessageTile(
-                    channel: channels[index],
-                  );
-                },
-                childCount: channels.length,
+    return PagedValueListenableBuilder<int, Channel>(
+      valueListenable: channelListController,
+      builder: (context, value, child) {
+        return value.when(
+              (channels, nextPageKey, error) {
+            if (channels.isEmpty) {
+              return const Center(
+                child: Text(
+                  'So empty.\nGo and message someone.',
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
+            return LazyLoadScrollView(
+              onEndOfPage: () async {
+                if (nextPageKey != null) {
+                  channelListController.loadMore(nextPageKey);
+                }
+              },
+              child: CustomScrollView(
+                slivers: [
+                  const SliverToBoxAdapter(
+                    child: _Stories(),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                        return _MessageTile(
+                          channel: channels[index],
+                        );
+                      },
+                      childCount: channels.length,
+                    ),
+                  )
+                ],
               ),
-            )
-          ],
+            );
+          },
+          loading: () => const Center(
+            child: SizedBox(
+              height: 100,
+              width: 100,
+              child: CircularProgressIndicator(),
+            ),
+          ),
+          error: (e) => DisplayErrorMessage(
+            error: e,
+          ),
         );
       },
     );
@@ -204,16 +226,16 @@ class _MessageTile extends StatelessWidget {
 
         if (lastMessageAt.millisecondsSinceEpoch >=
             startOfDay.millisecondsSinceEpoch) {
-          stringDate = Jiffy.parseFromDateTime(lastMessageAt.toLocal()).jm;
+          stringDate = Jiffy(lastMessageAt.toLocal()).jm;
         } else if (lastMessageAt.millisecondsSinceEpoch >=
             startOfDay
                 .subtract(const Duration(days: 1))
                 .millisecondsSinceEpoch) {
           stringDate = 'YESTERDAY';
         } else if (startOfDay.difference(lastMessageAt).inDays < 7) {
-          stringDate = Jiffy.parseFromDateTime(lastMessageAt.toLocal()).EEEE;
+          stringDate = Jiffy(lastMessageAt.toLocal()).EEEE;
         } else {
-          stringDate = Jiffy.parseFromDateTime(lastMessageAt.toLocal()).yMd;
+          stringDate = Jiffy(lastMessageAt.toLocal()).yMd;
         }
         return Text(
           stringDate,
